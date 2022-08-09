@@ -14,7 +14,7 @@ public class Person extends Audit {
 
     @Id
     private String id;
-    private String firstname;
+    private String firstName;
     private String lastName;
     private PersonGenre genre;
     private String documentId;
