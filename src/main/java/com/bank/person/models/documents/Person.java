@@ -22,6 +22,7 @@ public class Person extends Audit {
     private String lastName;
     @NotNull(message = "genre must not be null")
     private PersonGenre genre;
+    @NotNull(message = "documentId must not be null")
     private String documentId;
     private String phoneNumber;
     private String email;
