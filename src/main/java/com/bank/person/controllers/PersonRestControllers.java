@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/api/person")
 public class PersonRestControllers {
@@ -21,8 +24,8 @@ public class PersonRestControllers {
     private static final Logger log = LoggerFactory.getLogger(PersonRestControllers.class);
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> Create(@RequestBody Person p) {
-
+    public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Person p) {
+        p.setCreatedDate(LocalDateTime.now());
         return dao.save(p)
                 .doOnNext(person -> log.info(person.toString()))
                 .map(person -> ResponseHandler.response("Done", HttpStatus.OK, person))
@@ -52,13 +55,15 @@ public class PersonRestControllers {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id, @RequestBody Person p) {
+    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Valid @RequestBody Person p) {
         return dao.existsById(id).flatMap(check -> {
-            if (check)
+            if (check){
+                p.setUpdateDate(LocalDateTime.now());
                 return dao.save(p)
                         .doOnNext(person -> log.info(person.toString()))
                         .map(person -> ResponseHandler.response("Done", HttpStatus.OK, person))
                         .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
+            }
             else
                 return Mono.just(ResponseHandler.response("Not found", HttpStatus.NOT_FOUND, null));
 
