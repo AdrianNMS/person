@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 
 @RestController
@@ -24,7 +24,7 @@ public class PersonRestControllers {
     private static final Logger log = LoggerFactory.getLogger(PersonRestControllers.class);
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Person p) {
+    public Mono<ResponseEntity<Object>> Create(@Validated @RequestBody Person p) {
         p.setCreatedDate(LocalDateTime.now());
         return dao.save(p)
                 .doOnNext(person -> log.info(person.toString()))
@@ -55,7 +55,7 @@ public class PersonRestControllers {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Valid @RequestBody Person p) {
+    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Validated @RequestBody Person p) {
         return dao.existsById(id).flatMap(check -> {
             if (check){
                 p.setUpdateDate(LocalDateTime.now());
