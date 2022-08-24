@@ -1,12 +1,11 @@
 package com.bank.person.controllers.models;
 
-import com.bank.person.models.documents.Person;
 import lombok.Data;
 
 @Data
-public class ResponsePerson
+public class ResponsePerson <T>
 {
-    private Person data;
+    private T data;
 
     private String message;
 

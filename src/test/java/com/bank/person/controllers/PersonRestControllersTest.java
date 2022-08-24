@@ -1,7 +1,6 @@
 package com.bank.person.controllers;
 
 import com.bank.person.controllers.models.ResponsePerson;
-import com.bank.person.controllers.models.ResponsePersonFindAll;
 import com.bank.person.models.dao.PersonDao;
 import com.bank.person.models.documents.Person;
 import com.bank.person.models.enums.PersonGenre;
@@ -11,12 +10,14 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @WebFluxTest
 public class PersonRestControllersTest {
@@ -48,7 +49,7 @@ public class PersonRestControllersTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponsePerson.class)
+                .expectBody(new ParameterizedTypeReference<ResponsePerson<Person>>(){})
                 .value(responsePerson -> {
                     var personR = responsePerson.getData();
                     Assertions.assertThat(personR.getId()).isEqualTo("1");
@@ -73,7 +74,7 @@ public class PersonRestControllersTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponsePerson.class)
+                .expectBody(new ParameterizedTypeReference<ResponsePerson<Person>>(){})
                 .value(responsePerson -> {
                     var personR = responsePerson.getData();
                     Assertions.assertThat(personR.getId()).isEqualTo("1");
@@ -101,7 +102,7 @@ public class PersonRestControllersTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponsePersonFindAll.class)
+                .expectBody(new ParameterizedTypeReference<ResponsePerson<List<Person>>>(){})
                 .value(responsePerson -> {
                     var personList = responsePerson.getData();
                     personList.forEach(person1 -> {
@@ -135,7 +136,7 @@ public class PersonRestControllersTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponsePerson.class)
+                .expectBody(new ParameterizedTypeReference<ResponsePerson<Person>>(){})
                 .value(responsePerson -> {
                     var personR = responsePerson.getData();
                     Assertions.assertThat(personR.getId()).isEqualTo("1");
@@ -161,7 +162,7 @@ public class PersonRestControllersTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponsePerson.class)
+                .expectBody(new ParameterizedTypeReference<ResponsePerson<Person>>(){})
                 .value(responsePerson -> {
                     Assertions.assertThat(responsePerson.getStatus()).isEqualTo("OK");
                 });
