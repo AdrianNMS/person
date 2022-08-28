@@ -3,6 +3,7 @@ package com.bank.person.models.documents;
 import com.bank.person.models.enums.PersonGenre;
 import com.bank.person.models.utils.Audit;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Document(collection = "persons")
 public class Person extends Audit {
 

@@ -6,8 +6,6 @@ import com.bank.person.models.services.impl.PersonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,21 +16,10 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/person")
 public class PersonRestControllers {
-
     @Autowired
     private PersonService personService;
 
-    @Autowired
-    private ReactiveRedisTemplate<String, Person> redisTemplate;
     private static final Logger log = LoggerFactory.getLogger(PersonRestControllers.class);
-
-    /*@PostMapping("/redis")
-    public Mono<Boolean> put(@RequestBody Person per) {
-
-        return redisTemplate.opsForValue().set("111", per);
-    }*/
-
-
 
     @PostMapping
     public Mono<ResponseEntity<Object>> Create(@Validated @RequestBody Person p) {
