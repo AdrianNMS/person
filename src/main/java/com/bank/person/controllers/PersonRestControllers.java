@@ -1,8 +1,8 @@
 package com.bank.person.controllers;
 
 import com.bank.person.handler.ResponseHandler;
+import com.bank.person.models.dao.PersonDao;
 import com.bank.person.models.documents.Person;
-import com.bank.person.services.impl.PersonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,14 @@ import java.time.LocalDateTime;
 public class PersonRestControllers {
 
     @Autowired
-    private PersonService personService;
+    private PersonDao dao;
 
     private static final Logger log = LoggerFactory.getLogger(PersonRestControllers.class);
 
     @PostMapping
     public Mono<ResponseEntity<Object>> Create(@Validated @RequestBody Person p) {
-        return personService.Create(p)
+        p.setCreatedDate(LocalDateTime.now());
+        return dao.save(p)
                 .doOnNext(person -> log.info(person.toString()))
                 .map(person -> ResponseHandler.response("Done", HttpStatus.OK, person))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
@@ -33,16 +34,21 @@ public class PersonRestControllers {
 
     @GetMapping
     public Mono<ResponseEntity<Object>> FindAll() {
-        return personService.FindAll()
+
+        return dao.findAll().map(person -> {
+                    person.setFirstName(person.getFirstName().toUpperCase());
+                    person.setLastName(person.getLastName().toUpperCase());
+                    return person;
+                })
                 .doOnNext(person -> log.info(person.toString()))
-                .map(persons -> ResponseHandler.response("Done", HttpStatus.OK, persons))
+                .collectList().map(persons -> ResponseHandler.response("Done", HttpStatus.OK, persons))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
 
     }
 
     @GetMapping("/{id}")
     public Mono<ResponseEntity<Object>> Find(@PathVariable String id) {
-        return personService.Find(id)
+        return dao.findById(id)
                 .doOnNext(person -> log.info(person.toString()))
                 .map(person -> ResponseHandler.response("Done", HttpStatus.OK, person))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
@@ -50,17 +56,28 @@ public class PersonRestControllers {
 
     @PutMapping("/{id}")
     public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Validated @RequestBody Person p) {
-        return personService.Update(id,p)
-                .flatMap(debitCard -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, debitCard)))
-                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
-                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)));
+        return dao.existsById(id).flatMap(check -> {
+            if (check){
+                p.setUpdateDate(LocalDateTime.now());
+                return dao.save(p)
+                        .doOnNext(person -> log.info(person.toString()))
+                        .map(person -> ResponseHandler.response("Done", HttpStatus.OK, person))
+                        .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
+            }
+            else
+                return Mono.just(ResponseHandler.response("Not found", HttpStatus.NOT_FOUND, null));
+
+        });
     }
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Object>> Delete(@PathVariable("id") String id) {
-        return personService.Delete(id)
-                .flatMap(o -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, null)))
-                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
-                .switchIfEmpty(Mono.just(ResponseHandler.response("Error", HttpStatus.NO_CONTENT, null)));
+
+        return dao.existsById(id).flatMap(check -> {
+            if (check)
+                return dao.deleteById(id).then(Mono.just(ResponseHandler.response("Done", HttpStatus.OK, null)));
+            else
+                return Mono.just(ResponseHandler.response("Not found", HttpStatus.NOT_FOUND, null));
+        });
     }
 }

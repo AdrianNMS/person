@@ -4,9 +4,7 @@ import com.bank.person.controllers.models.ResponsePerson;
 import com.bank.person.models.dao.PersonDao;
 import com.bank.person.models.documents.Person;
 import com.bank.person.models.enums.PersonGenre;
-import com.bank.person.services.impl.PersonService;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,45 +26,26 @@ public class PersonRestControllersTest {
     private WebTestClient webTestClient;
 
     @MockBean
-    @Autowired
-    private PersonService personService;
-
-    @MockBean
-    private Person person;
-
-    @BeforeEach
-    public void setupMock(){
-        person = Person.builder()
-                .id("1")
-                .firstName("Mary")
-                .lastName("Tito")
-                .genre(PersonGenre.FEMALE)
-                .documentId("75007684")
-                .phoneNumber("960000226")
-                .email("mary.ttito.16@outlook.com")
-                .build();
-
-        var personFlux = Flux.just(person);
-        var personMono = Mono.just(person);
-
-        Mockito.when(personService.FindAll())
-                .thenReturn(personFlux.collectList());
-        Mockito.when(personService.Find("1"))
-                .thenReturn(personMono);
-        Mockito.when(personService.Create(person))
-                .thenReturn(personMono);
-        Mockito.when(personService.Update("1",person))
-                .thenReturn(personMono);
-        Mockito.when(personService.Delete("1"))
-                .thenReturn(Mono.just(true));
-    }
+    PersonDao dao;
 
     @Test
-    void create() {
+    void create()
+    {
+        Person person = new Person();
+        person.setId("1");
+        person.setFirstName("Mary");
+        person.setLastName("Tito");
+        person.setGenre(PersonGenre.FEMALE);
+        person.setDocumentId("75007684");
+
+        var personMono = Mono.just(person);
+
+        Mockito.when(dao.save(person)).thenReturn(personMono);
+
         webTestClient.post()
                 .uri("/api/person")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(person), Person.class)
+                .body(personMono, Person.class)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -75,10 +54,21 @@ public class PersonRestControllersTest {
                     var personR = responsePerson.getData();
                     Assertions.assertThat(personR.getId()).isEqualTo("1");
                 });
+
     }
 
     @Test
     void find() {
+        Person person = new Person();
+        person.setId("1");
+        person.setFirstName("Mary");
+        person.setLastName("Tito");
+        person.setGenre(PersonGenre.FEMALE);
+        person.setDocumentId("75007684");
+
+        Mono<Person> personMono = Mono.just(person);
+        Mockito.when(dao.findById("1")).thenReturn(personMono);
+
         webTestClient.get().uri("/api/person/{id}","1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -93,6 +83,20 @@ public class PersonRestControllersTest {
 
     @Test
     void findAll() {
+        Person person = new Person();
+        person.setId("1");
+        person.setFirstName("Mary");
+        person.setLastName("Tito");
+        person.setGenre(PersonGenre.FEMALE);
+        person.setDocumentId("75007684");
+
+        var list = new ArrayList<Person>();
+        list.add(person);
+
+        var personFlux = Flux.fromIterable(list);
+
+        Mockito.when(dao.findAll()).thenReturn(personFlux);
+
         webTestClient.get().uri("/api/person")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -105,10 +109,26 @@ public class PersonRestControllersTest {
                         Assertions.assertThat(person1.getId()).isEqualTo("1");
                     });
                 });
+
     }
 
     @Test
-    void update() {
+    void update()
+    {
+        Person person = new Person();
+        person.setId("1");
+        person.setFirstName("Mary");
+        person.setLastName("Tito");
+        person.setGenre(PersonGenre.FEMALE);
+        person.setDocumentId("75007684");
+
+
+        Mono<Boolean> bol = Mono.just(true);
+        Mockito.when(dao.existsById("1")).thenReturn(bol);
+
+        Mono<Person> personMono = Mono.just(person);
+        Mockito.when(dao.save(person)).thenReturn(personMono);
+
         webTestClient.put()
                 .uri("/api/person/{id}","1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,10 +142,21 @@ public class PersonRestControllersTest {
                     Assertions.assertThat(personR.getId()).isEqualTo("1");
                     Assertions.assertThat(personR.getFirstName()).isEqualTo("Mary");
                 });
+
+
     }
+
+
 
     @Test
     void delete() {
+
+        Mono<Boolean> bol = Mono.just(true);
+        Mockito.when(dao.existsById("1")).thenReturn(bol);
+
+        Mono<Void> empty  = Mono.empty();
+        Mockito.when(dao.deleteById("1")).thenReturn(empty);
+
         webTestClient.delete().uri("/api/person/{id}","1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -135,5 +166,6 @@ public class PersonRestControllersTest {
                 .value(responsePerson -> {
                     Assertions.assertThat(responsePerson.getStatus()).isEqualTo("OK");
                 });
+
     }
 }
