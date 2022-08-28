@@ -49,15 +49,15 @@ public class PersonRestControllersTest {
         var personFlux = Flux.just(person);
         var personMono = Mono.just(person);
 
-        Mockito.when(personService.FindAll())
+        Mockito.when(personService.findAll())
                 .thenReturn(personFlux.collectList());
-        Mockito.when(personService.Find("1"))
+        Mockito.when(personService.find("1"))
                 .thenReturn(personMono);
-        Mockito.when(personService.Create(person))
+        Mockito.when(personService.create(person))
                 .thenReturn(personMono);
-        Mockito.when(personService.Update("1",person))
+        Mockito.when(personService.update("1",person))
                 .thenReturn(personMono);
-        Mockito.when(personService.Delete("1"))
+        Mockito.when(personService.delete("1"))
                 .thenReturn(Mono.just(true));
     }
 

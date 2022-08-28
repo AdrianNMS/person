@@ -6,9 +6,9 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface IPersonService {
-    Mono<List<Person>> FindAll();
-    Mono<Person> Find(String id);
-    Mono<Person> Create(Person person);
-    Mono<Person> Update(String id, Person person);
-    Mono<Object> Delete(String id);
+    Mono<List<Person>> findAll();
+    Mono<Person> find(String id);
+    Mono<Person> create(Person person);
+    Mono<Person> update(String id, Person person);
+    Mono<Object> delete(String id);
 }

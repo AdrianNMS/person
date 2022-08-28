@@ -11,7 +11,6 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class PersonService implements IPersonService {
@@ -22,7 +21,7 @@ public class PersonService implements IPersonService {
     private ReactiveRedisTemplate<String, Person> redisTemplate;
 
     @Override
-    public Mono<List<Person>> FindAll() {
+    public Mono<List<Person>> findAll() {
 
         return dao.findAll().map(person -> {
                     person.setFirstName(person.getFirstName().toUpperCase());
@@ -33,7 +32,7 @@ public class PersonService implements IPersonService {
     }
 
     @Override
-    public Mono<Person> Find(String id) {
+    public Mono<Person> find(String id) {
         return redisTemplate.opsForValue().get(id)
                 .switchIfEmpty(dao.findById(id)
                         .doOnNext(per -> redisTemplate.opsForValue()
@@ -44,7 +43,7 @@ public class PersonService implements IPersonService {
     }
 
     @Override
-    public Mono<Person> Create(Person person) {
+    public Mono<Person> create(Person person) {
         person.setCreatedDate(LocalDateTime.now());
 
         return dao.save(person)
@@ -56,10 +55,10 @@ public class PersonService implements IPersonService {
     }
 
     @Override
-    public Mono<Person> Update(String id, Person person) {
+    public Mono<Person> update(String id, Person person) {
         return dao.existsById(id).flatMap(check ->
         {
-            if (check)
+            if (Boolean.TRUE.equals(check))
             {
                 redisTemplate.opsForValue().delete(id).subscribe();
                 return dao.save(person)
@@ -76,9 +75,9 @@ public class PersonService implements IPersonService {
     }
 
     @Override
-    public Mono<Object> Delete(String id) {
+    public Mono<Object> delete(String id) {
         return dao.existsById(id).flatMap(check -> {
-            if (check)
+            if (Boolean.TRUE.equals(check))
             {
                 redisTemplate.opsForValue().delete(id).subscribe();
                 return dao.deleteById(id).then(Mono.just(true));
