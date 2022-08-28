@@ -22,16 +22,7 @@ public class PersonRestControllers {
     @Autowired
     private PersonService personService;
 
-    @Autowired
-    private ReactiveRedisTemplate<String, Person> redisTemplate;
     private static final Logger log = LoggerFactory.getLogger(PersonRestControllers.class);
-
-    /*@PostMapping("/redis")
-    public Mono<Boolean> put(@RequestBody Person per) {
-
-        return redisTemplate.opsForValue().set("111", per);
-    }*/
-
 
 
     @PostMapping
