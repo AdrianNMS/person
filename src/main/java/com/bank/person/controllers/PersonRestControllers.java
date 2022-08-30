@@ -24,7 +24,7 @@ public class PersonRestControllers {
     public Mono<ResponseEntity<Object>> create(@Validated @RequestBody Person p) {
         return personService.create(p)
                 .doOnNext(person -> log.info(person.toString()))
-                .map(person -> ResponseHandler.response("Done", HttpStatus.OK, person))
+                .flatMap(person -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, person)))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
     }
 
@@ -32,7 +32,7 @@ public class PersonRestControllers {
     public Mono<ResponseEntity<Object>> findAll() {
         return personService.findAll()
                 .doOnNext(person -> log.info(person.toString()))
-                .map(persons -> ResponseHandler.response("Done", HttpStatus.OK, persons))
+                .flatMap(persons -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, persons)))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
 
     }
@@ -41,7 +41,7 @@ public class PersonRestControllers {
     public Mono<ResponseEntity<Object>> find(@PathVariable String id) {
         return personService.find(id)
                 .doOnNext(person -> log.info(person.toString()))
-                .map(person -> ResponseHandler.response("Done", HttpStatus.OK, person))
+                .flatMap(person -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, person)))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
     }
 
